@@ -1,1 +1,1 @@
-from .rl_criterion import *
+from .ar_continuous_loss import CosineARCriterion
