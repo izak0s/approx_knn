@@ -41,7 +41,10 @@ class ContinuousTransformerDecoder(TransformerDecoderBase):
             utils.load_embedding(embed_dict, dictionary, self.target_embed)
         self.target_embed.weight.requires_grad = False
         self.target_embed_normalized = F.normalize(self.target_embed.weight.detach(),
-                                                   dim=-1).cuda()
+                                                   dim=-1)
+        if torch.cuda.is_available():
+            self.target_embed_normalized = self.target_embed_normalized.cuda()
+
         kappa = torch.tensor([1.], device=self.target_embed_normalized.device)
         m = torch.tensor([self.output_embed_dim], device=self.target_embed_normalized.device)
         self.norm_const = _neglogcmk(m, kappa)
@@ -90,3 +93,11 @@ class ContinuousTransformerDecoder(TransformerDecoderBase):
             scores = self.get_cosine_similarity_scores(net_output[0])
 
         return scores
+
+    def get_normalized_probs_optimised(
+                self,
+                net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
+                log_probs: bool,
+                sample: Optional[Dict[str, Tensor]] = None,
+        ):
+        raise NotImplementedError("Optimised normalized probs not implemented for this decoder")
